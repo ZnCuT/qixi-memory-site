@@ -16,3 +16,7 @@
 @media(max-width:800px){.music-disc{width:52px;height:52px}.photo-frame,.photo-frame.portrait,.photo-frame.square,.photo-frame.landscape,.photo-frame.wide{width:min(94%,620px);max-width:100%;margin:auto}.photo-frame img{max-height:72vh}.photo-frame>p{font-size:11px}.game-board{min-height:480px;box-shadow:8px 10px 0 #3b1019}.game-character{width:150px;height:92px}.falling-item{width:42px;height:42px;font-size:23px}.game-overlay{padding:25px}.game-overlay h3{font-size:34px}.game-hud{padding:0 3px}}
 @media(max-width:360px){.music-disc{width:48px;height:48px}.game-board{min-height:440px}.game-character{width:132px;height:82px}.photo-frame>p{left:13px;right:13px}}
 @media(prefers-reduced-motion:reduce){.music-disc img{animation-duration:.01ms!important}.falling-item{transition:none}.game-board{scroll-behavior:auto}}
+
+/* Updated 4:3 photo set and custom game artwork. */
+.photo-frame,.photo-frame.portrait,.photo-frame.square,.photo-frame.landscape,.photo-frame.wide{aspect-ratio:4/3;max-width:none}.photo-frame img{max-height:none;object-fit:cover;object-position:center}.falling-item{width:58px;height:58px;font-size:0}.falling-item img{display:block;width:50px;height:50px;object-fit:contain;pointer-events:none}
+@media(max-width:800px){.photo-frame,.photo-frame.portrait,.photo-frame.square,.photo-frame.landscape,.photo-frame.wide{width:min(94%,620px);max-width:100%}.photo-frame img{max-height:none}.falling-item{width:48px;height:48px}.falling-item img{width:42px;height:42px}}

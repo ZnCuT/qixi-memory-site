@@ -6,7 +6,6 @@ export type Memory = {
   note: string;
   tone: string;
   position?: string;
-  ratio: "portrait" | "square" | "landscape" | "wide";
 };
 
 export const loveStory = {
@@ -26,18 +25,26 @@ export const loveStory = {
 };
 
 export const memories: Memory[] = [
-  { date: "初见", title: "故事从这一天开始", text: "实践部让我们相识，颁奖典礼让我知道，原来我们锐涛这么厉害。", note: "原来命运真的会提前埋下伏笔", tone: "rose", image: "/photos/01-first-meeting.jpg", position: "center 56%", ratio: "portrait" },
-  { date: "第一次约会", title: "紧张又开心的一天", text: "我们第一次约会，吃完寿司一起逛街。然后，我们的大魔术师布布就这样把花花变出来啦。", note: "那天的晚风，我到现在还记得", tone: "cream", image: "/photos/02-first-date.jpg", position: "center 38%", ratio: "portrait" },
-  { date: "一张很喜欢的合照", title: "镜头刚好留住我们", text: "南宁之旅的合照。晚霞很美，我们两个也都很好看。", note: "美丽的晚霞，也有好看的我们", tone: "sage", image: "/photos/03-nanning-sunset.jpg", position: "center", ratio: "wide" },
-  { date: "大吃一口合集", title: "一起吃很多好吃的", text: "日料、西餐，还有好多想一起打卡的味道……话说，我们真的好久没拍“大吃一口”系列了！以后也要一直一起吃好吃的 😋", note: "小宝之“大吃一口”系列", tone: "blue", image: "/photos/04-big-bite.jpg", position: "center 40%", ratio: "square" },
-  { date: "平凡的一天", title: "日常才是最长情的告白", text: "一顿饭、一场电影、一次散步。最普通的瞬间，也会因为是和你一起而变得特别。", note: "普通日子里的小小幸福", tone: "peach", image: "/photos/05-sunflower-day.jpg", position: "center", ratio: "landscape" },
-  { date: "值得纪念的瞬间", title: "谢谢你一直在", text: "平淡生活里突然出现的布布版 Spider-Man，是只有我们懂的快乐，也是我想一直珍藏的瞬间。", note: "快乐加倍的瞬间", tone: "cream", image: "/photos/06-spiderman.jpg", position: "center 46%", ratio: "wide" },
+  { date: "初见", title: "故事从这一天开始", text: "实践部让我们相识，颁奖典礼让我知道，原来我们锐涛这么厉害。", note: "原来命运真的会提前埋下伏笔", tone: "rose", image: "/photos/01-first-meeting.jpg", position: "center" },
+  { date: "第一次约会", title: "紧张又开心的一天", text: "我们第一次约会，吃完寿司一起逛街。然后，我们的大魔术师布布就这样把花花变出来啦。", note: "那天的晚风，我到现在还记得", tone: "cream", image: "/photos/02-first-date.jpg", position: "center" },
+  { date: "一张很喜欢的合照", title: "镜头刚好留住我们", text: "南宁之旅的合照。晚霞很美，我们两个也都很好看。", note: "美丽的晚霞，也有好看的我们", tone: "sage", image: "/photos/03-nanning-sunset.jpg", position: "center" },
+  { date: "大吃一口合集", title: "一起吃很多好吃的", text: "日料、西餐，还有好多想一起打卡的味道……话说，我们真的好久没拍“大吃一口”系列了！以后也要一直一起吃好吃的 😋", note: "小宝之“大吃一口”系列", tone: "blue", image: "/photos/04-big-bite.jpg", position: "center" },
+  { date: "平凡的一天", title: "日常才是最长情的告白", text: "一顿饭、一场电影、一次散步。最普通的瞬间，也会因为是和你一起而变得特别。", note: "普通日子里的小小幸福", tone: "peach", image: "/photos/05-sunflower-day.jpg", position: "center" },
+  { date: "值得纪念的瞬间", title: "谢谢你一直在", text: "平淡生活里突然出现的布布版 Spider-Man，是只有我们懂的快乐，也是我想一直珍藏的瞬间。", note: "快乐加倍的瞬间", tone: "cream", image: "/photos/06-spiderman.jpg", position: "center" },
 ];
 
 export const catchGame = {
   duration: 30,
   target: 12,
   character: "/game/bubu-duo.png",
-  items: ["💗", "🌷", "🍣", "🎟️", "💿", "🕷️"],
+  items: [
+    { src: "/game/heart.png", label: "爱心" },
+    { src: "/game/flower.png", label: "花朵" },
+    { src: "/game/flower-basket.png", label: "花篮" },
+    { src: "/game/sushi.png", label: "寿司" },
+    { src: "/game/hotpot.png", label: "火锅" },
+    { src: "/game/movie-ticket.png", label: "电影票" },
+    { src: "/game/spiderman.png", label: "蜘蛛侠" },
+  ],
   ending: "原来我们已经接住了这么多快乐，以后也要继续接住彼此呀。",
 };

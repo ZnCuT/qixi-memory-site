@@ -5,7 +5,7 @@ import { catchGame, loveStory, memories } from "./content";
 
 export const dynamic = "force-static";
 
-type FallingItem = { id: number; icon: string; x: number; y: number; speed: number };
+type FallingItem = { id: number; src: string; label: string; x: number; y: number; speed: number };
 
 function CatchGame({ basePath }: { basePath: string }) {
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -48,8 +48,8 @@ function CatchGame({ basePath }: { basePath: string }) {
       const height = boardRef.current?.clientHeight ?? 440;
       if (spawnClock >= (reduced ? 900 : 650)) {
         spawnClock = 0;
-        const icon = catchGame.items[nextId % catchGame.items.length];
-        const fresh = { id: nextId++, icon, x: 8 + Math.random() * 84, y: -45, speed: reduced ? 0.10 : 0.15 + Math.random() * 0.06 };
+        const asset = catchGame.items[nextId % catchGame.items.length];
+        const fresh = { id: nextId++, ...asset, x: 8 + Math.random() * 84, y: -45, speed: reduced ? 0.10 : 0.15 + Math.random() * 0.06 };
         setItems((current) => [...current, fresh]);
       }
       setItems((current) => current.flatMap((item) => {
@@ -100,7 +100,7 @@ function CatchGame({ basePath }: { basePath: string }) {
         aria-label="接住爱的碎片小游戏，可左右拖动角色，也可使用键盘方向键"
       >
         <div className="game-sky" aria-hidden="true">LOVE · DINNER · WALK · US</div>
-        {items.map((item) => <span className="falling-item" key={item.id} style={{ left: `${item.x}%`, top: item.y }}>{item.icon}</span>)}
+        {items.map((item) => <span className="falling-item" key={item.id} style={{ left: `${item.x}%`, top: item.y }}><img src={`${basePath}${item.src}`} alt={item.label} draggable={false} /></span>)}
         <img className="game-character" src={`${basePath}${catchGame.character}`} alt="两只布布一起接住爱的碎片" draggable={false} style={{ left: `${playerX}%` }} />
         {status === "ready" && <div className="game-overlay"><span>💌</span><h3>接住爱的碎片</h3><p>左右拖动布布，接住从回忆里掉下来的小快乐。</p><button type="button" onClick={startGame}>开始游戏</button></div>}
         {status === "finished" && <div className="game-overlay finished"><span>{score >= catchGame.target ? "💞" : "🌷"}</span><h3>{score >= catchGame.target ? "全部好好接住啦" : "快乐已经装进口袋啦"}</h3><p>{catchGame.ending}</p><button type="button" onClick={startGame}>再玩一次</button></div>}
@@ -190,7 +190,7 @@ export default function Home() {
         <div className="memory-list">
           {memories.map((memory, index) => (
             <article className={index % 2 ? "memory reverse" : "memory"} key={memory.title}>
-              <div className={`photo-frame ${memory.tone} ${memory.ratio}`}>
+              <div className={`photo-frame ${memory.tone}`}>
                 {memory.image ? <img src={`${basePath}${memory.image}`} alt={`${memory.date}：${memory.note}`} style={{ objectPosition: memory.position }} loading="lazy" /> : <div className="photo-placeholder"><span>PHOTO {String(index + 1).padStart(2, "0")}</span><i>♥</i><small>替换成你们的照片</small></div>}
                 <p>{memory.note}</p>
               </div>
