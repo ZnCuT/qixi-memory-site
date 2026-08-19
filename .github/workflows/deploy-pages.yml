@@ -30,6 +30,10 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /qixi-memory-site
+      - name: Normalize GitHub Pages asset paths
+        run: |
+          mv dist/client/qixi-memory-site/_next dist/client/_next
+          rmdir dist/client/qixi-memory-site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
