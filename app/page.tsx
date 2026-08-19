@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { loveStory, memories, quiz } from "./content";
 
 export const dynamic = "force-static";
-
-function daysTogether() {
-  const start = new Date(`${loveStory.anniversary}T00:00:00`);
-  return Math.max(1, Math.floor((Date.now() - start.getTime()) / 86400000) + 1);
-}
 
 export default function Home() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -21,7 +16,6 @@ export default function Home() {
   const [secretTaps, setSecretTaps] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const current = quiz[quizIndex];
-  const days = useMemo(daysTogether, []);
 
   useEffect(() => () => audioRef.current?.pause(), []);
 
@@ -72,8 +66,8 @@ export default function Home() {
         <p className="eyebrow">A LETTER FOR YOU · 七夕 2026</p>
         <div className="hero-copy">
           <p>To · {loveStory.to}</p>
-          <h1>有一封信，<br />想慢慢说给你听。</h1>
-          <span>写于夏末，寄往你的心里</span>
+          <h1>七夕有封信，<br />点击打开吧 <i className="pointing">👉</i></h1>
+          <span>写于七夕，寄给我的臭布布</span>
         </div>
         <button className="envelope-stage" type="button" aria-label={opened ? "信封已打开，阅读信件" : "点击拆开信封"} aria-pressed={opened} onClick={openLetter}>
           <span className="envelope">
@@ -88,7 +82,7 @@ export default function Home() {
       <section id="letter" className="letter-section">
         <div className="section-mark"><span>01</span><p>LOVE LETTER<br />写给你的话</p></div>
         <article className="paper-letter">
-          <p className="salutation">亲爱的你：</p>
+          <p className="salutation">{loveStory.salutation}</p>
           {loveStory.letter.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           <p className="signature">爱你的<br /><b>{loveStory.from}</b></p>
         </article>
@@ -97,7 +91,7 @@ export default function Home() {
 
       <section className="numbers" aria-label="我们的纪念数字">
         <p className="section-kicker">A FEW LITTLE NUMBERS</p>
-        <div><article><strong>{days}</strong><span>相识相爱的日子</span></article><article><strong>{memories.length}</strong><span>首批珍藏回忆</span></article><article><strong>∞</strong><span>还没写完的以后</span></article></div>
+        <div><article><strong>{loveStory.metrics.loveDays}</strong><span>恋爱天数</span></article><article><strong>{loveStory.metrics.xhsSpark}</strong><span>小红书火花</span></article><article><strong>∞</strong><span>还没写完的以后</span></article></div>
       </section>
 
       <section className="timeline" id="memories">
@@ -105,7 +99,7 @@ export default function Home() {
         <div className="memory-list">
           {memories.map((memory, index) => (
             <article className={index % 2 ? "memory reverse" : "memory"} key={memory.title}>
-              <div className={`photo-frame ${memory.tone}`} style={memory.image ? { backgroundImage: `url(${basePath}${memory.image})` } : undefined}>
+              <div className={`photo-frame ${memory.tone}`} style={memory.image ? { backgroundImage: `url(${basePath}${memory.image})`, backgroundPosition: memory.position } : undefined}>
                 {!memory.image && <div className="photo-placeholder"><span>PHOTO {String(index + 1).padStart(2, "0")}</span><i>♥</i><small>替换成你们的照片</small></div>}
                 <p>{memory.note}</p>
               </div>

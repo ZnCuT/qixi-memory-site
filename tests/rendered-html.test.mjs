@@ -16,9 +16,9 @@ test("renders the complete Qixi experience and private metadata", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /写给你的七夕情书/);
-  assert.match(html, /有一封信/);
+  assert.match(html, /七夕有封信/);
   assert.match(html, /关于我们/);
-  assert.match(html, /默契/);
+  assert.match(html, /关于我们/);
   assert.match(html, /name="robots" content="noindex, nofollow"/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Starter Project/);
 });
@@ -30,8 +30,9 @@ test("keeps content centralized and mobile fallbacks present", async () => {
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(page, /from ".\/content"/);
-  assert.equal((content.match(/question:/g) ?? []).length, 5);
+  assert.equal((content.split("export const quiz")[1]?.match(/\{ question:/g) ?? []).length, 5);
   assert.ok((content.match(/title:/g) ?? []).length >= 6);
+  assert.equal((content.match(/image: "\/photos\//g) ?? []).length, 6);
   assert.match(css, /@media\(max-width:800px\)/);
   assert.match(css, /@media\(max-width:360px\)/);
   assert.match(css, /prefers-reduced-motion:reduce/);
