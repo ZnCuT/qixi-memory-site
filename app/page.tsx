@@ -95,7 +95,11 @@ function CatchGame({ basePath }: { basePath: string }) {
       <div
         className="game-board"
         ref={boardRef}
-        onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); handlePointer(event); }}
+        onPointerDown={(event) => {
+          if (status !== "playing") return;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          handlePointer(event);
+        }}
         onPointerMove={handlePointer}
         aria-label="接住爱的碎片小游戏，可左右拖动角色，也可使用键盘方向键"
       >
