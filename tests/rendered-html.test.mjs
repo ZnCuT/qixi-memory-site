@@ -30,7 +30,8 @@ test("keeps content centralized and mobile fallbacks present", async () => {
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(page, /from ".\/content"/);
-  assert.equal((content.split("export const quiz")[1]?.match(/\{ question:/g) ?? []).length, 5);
+  assert.match(content, /export const catchGame/);
+  assert.match(page, /catchGame/);
   assert.ok((content.match(/title:/g) ?? []).length >= 6);
   assert.equal((content.match(/image: "\/photos\//g) ?? []).length, 6);
   assert.match(css, /@media\(max-width:800px\)/);
@@ -38,4 +39,6 @@ test("keeps content centralized and mobile fallbacks present", async () => {
   assert.match(css, /prefers-reduced-motion:reduce/);
   assert.match(css, /overflow-x:hidden/);
   assert.match(page, /aria-label/);
+  assert.match(page, /onPointerDown/);
+  assert.match(css, /\.catch-game/);
 });

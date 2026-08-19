@@ -1,21 +1,122 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { loveStory, memories, quiz } from "./content";
+import { catchGame, loveStory, memories } from "./content";
 
 export const dynamic = "force-static";
+
+type FallingItem = { id: number; icon: string; x: number; y: number; speed: number };
+
+function CatchGame({ basePath }: { basePath: string }) {
+  const boardRef = useRef<HTMLDivElement | null>(null);
+  const playerXRef = useRef(50);
+  const scoreRef = useRef(0);
+  const [status, setStatus] = useState<"ready" | "playing" | "finished">("ready");
+  const [items, setItems] = useState<FallingItem[]>([]);
+  const [playerX, setPlayerX] = useState(50);
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(catchGame.duration);
+
+  function movePlayer(next: number) {
+    const clamped = Math.max(10, Math.min(90, next));
+    playerXRef.current = clamped;
+    setPlayerX(clamped);
+  }
+
+  function startGame() {
+    scoreRef.current = 0;
+    setScore(0);
+    setItems([]);
+    setTimeLeft(catchGame.duration);
+    setStatus("playing");
+  }
+
+  useEffect(() => {
+    if (status !== "playing") return;
+    let frame = 0;
+    let nextId = 0;
+    let last = performance.now();
+    let spawnClock = 0;
+    let elapsed = 0;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function tick(now: number) {
+      const dt = Math.min(40, now - last);
+      last = now;
+      elapsed += dt;
+      spawnClock += dt;
+      const height = boardRef.current?.clientHeight ?? 440;
+      if (spawnClock >= (reduced ? 900 : 650)) {
+        spawnClock = 0;
+        const icon = catchGame.items[nextId % catchGame.items.length];
+        const fresh = { id: nextId++, icon, x: 8 + Math.random() * 84, y: -45, speed: reduced ? 0.10 : 0.15 + Math.random() * 0.06 };
+        setItems((current) => [...current, fresh]);
+      }
+      setItems((current) => current.flatMap((item) => {
+        const moved = { ...item, y: item.y + item.speed * dt };
+        const caught = moved.y > height - 112 && moved.y < height - 45 && Math.abs(moved.x - playerXRef.current) < 13;
+        if (caught) {
+          scoreRef.current += 1;
+          setScore(scoreRef.current);
+          return [];
+        }
+        return moved.y > height + 20 ? [] : [moved];
+      }));
+      const remaining = Math.max(0, catchGame.duration - Math.floor(elapsed / 1000));
+      setTimeLeft(remaining);
+      if (elapsed < catchGame.duration * 1000) frame = requestAnimationFrame(tick);
+      else setStatus("finished");
+    }
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== "playing") return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        movePlayer(playerXRef.current + (event.key === "ArrowLeft" ? -7 : 7));
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [status]);
+
+  function handlePointer(event: React.PointerEvent<HTMLDivElement>) {
+    if (status !== "playing" || !boardRef.current) return;
+    const rect = boardRef.current.getBoundingClientRect();
+    movePlayer(((event.clientX - rect.left) / rect.width) * 100);
+  }
+
+  return (
+    <div className="catch-game">
+      <div className="game-hud"><span>TIME <b>{timeLeft}s</b></span><span>已接住 <b>{score}</b> / {catchGame.target}</span></div>
+      <div
+        className="game-board"
+        ref={boardRef}
+        onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); handlePointer(event); }}
+        onPointerMove={handlePointer}
+        aria-label="接住爱的碎片小游戏，可左右拖动角色，也可使用键盘方向键"
+      >
+        <div className="game-sky" aria-hidden="true">LOVE · DINNER · WALK · US</div>
+        {items.map((item) => <span className="falling-item" key={item.id} style={{ left: `${item.x}%`, top: item.y }}>{item.icon}</span>)}
+        <img className="game-character" src={`${basePath}${catchGame.character}`} alt="两只布布一起接住爱的碎片" draggable={false} style={{ left: `${playerX}%` }} />
+        {status === "ready" && <div className="game-overlay"><span>💌</span><h3>接住爱的碎片</h3><p>左右拖动布布，接住从回忆里掉下来的小快乐。</p><button type="button" onClick={startGame}>开始游戏</button></div>}
+        {status === "finished" && <div className="game-overlay finished"><span>{score >= catchGame.target ? "💞" : "🌷"}</span><h3>{score >= catchGame.target ? "全部好好接住啦" : "快乐已经装进口袋啦"}</h3><p>{catchGame.ending}</p><button type="button" onClick={startGame}>再玩一次</button></div>}
+      </div>
+      <p className="game-tip">手机左右拖动 · 电脑也可使用 ← →</p>
+    </div>
+  );
+}
 
 export default function Home() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   const [opened, setOpened] = useState(false);
-  const [quizIndex, setQuizIndex] = useState(0);
-  const [choice, setChoice] = useState<number | null>(null);
-  const [finished, setFinished] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [musicError, setMusicError] = useState(false);
   const [secretTaps, setSecretTaps] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const current = quiz[quizIndex];
 
   useEffect(() => () => audioRef.current?.pause(), []);
 
@@ -42,23 +143,13 @@ export default function Home() {
     }
   }
 
-  function nextQuestion() {
-    if (choice === null) return;
-    if (quizIndex === quiz.length - 1) setFinished(true);
-    else { setQuizIndex((index) => index + 1); setChoice(null); }
-  }
-
-  function restart() {
-    setQuizIndex(0); setChoice(null); setFinished(false);
-  }
-
   return (
     <main>
       <header className="topbar">
         <a href="#top" className="brand">OUR STORY <i>♥</i></a>
-        <button className="music" type="button" onClick={toggleMusic} aria-label={playing ? "暂停音乐" : "播放音乐"}>
-          <span className={playing ? "equalizer playing" : "equalizer"}><i /><i /><i /></span>
-          {playing ? "暂停音乐" : "播放我们的歌"}
+        <button className={`music-disc ${playing ? "is-playing" : ""}`} type="button" onClick={toggleMusic} aria-label={playing ? "暂停《Kiss Me》" : "播放《Kiss Me》"} aria-pressed={playing}>
+          <img src={`${basePath}/cd-player.png`} alt="" aria-hidden="true" />
+          <span>{playing ? "Ⅱ" : "▶"}</span>
         </button>
       </header>
 
@@ -99,8 +190,8 @@ export default function Home() {
         <div className="memory-list">
           {memories.map((memory, index) => (
             <article className={index % 2 ? "memory reverse" : "memory"} key={memory.title}>
-              <div className={`photo-frame ${memory.tone}`} style={memory.image ? { backgroundImage: `url(${basePath}${memory.image})`, backgroundPosition: memory.position } : undefined}>
-                {!memory.image && <div className="photo-placeholder"><span>PHOTO {String(index + 1).padStart(2, "0")}</span><i>♥</i><small>替换成你们的照片</small></div>}
+              <div className={`photo-frame ${memory.tone} ${memory.ratio}`}>
+                {memory.image ? <img src={`${basePath}${memory.image}`} alt={`${memory.date}：${memory.note}`} style={{ objectPosition: memory.position }} loading="lazy" /> : <div className="photo-placeholder"><span>PHOTO {String(index + 1).padStart(2, "0")}</span><i>♥</i><small>替换成你们的照片</small></div>}
                 <p>{memory.note}</p>
               </div>
               <div className="memory-copy"><span>{String(index + 1).padStart(2, "0")} / {memory.date}</span><h3>{memory.title}</h3><p>{memory.text}</p></div>
@@ -109,16 +200,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="quiz-section" id="quiz">
-        <div className="quiz-intro"><p className="section-kicker">03 · ONLY YOU KNOW</p><h2>关于我们，<br />你还记得吗？</h2><p>没有输赢，只有藏在答案里的小情话。</p></div>
-        <div className="quiz-card">
-          {!finished ? <>
-            <div className="quiz-progress"><span>QUESTION {quizIndex + 1} / {quiz.length}</span><i style={{ width: `${((quizIndex + 1) / quiz.length) * 100}%` }} /></div>
-            <h3>{current.question}</h3>
-            <div className="options">{current.options.map((option, index) => <button type="button" className={choice === index ? "selected" : ""} onClick={() => setChoice(index)} key={option}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}</div>
-            {choice !== null && <div className="answer"><b>{choice === current.answer ? "被你猜中啦 ♥" : "这个答案也很可爱"}</b><p>{current.reply}</p><button type="button" onClick={nextQuestion}>{quizIndex === quiz.length - 1 ? "打开最后一页" : "下一题"} →</button></div>}
-          </> : <div className="quiz-finish"><span>♥</span><p>默契测试完成</p><h3>答案也许会忘，<br />喜欢你这件事不会。</h3><button type="button" onClick={() => document.querySelector("#finale")?.scrollIntoView({ behavior: "smooth" })}>领取你的告白</button><button className="text-button" type="button" onClick={restart}>再玩一次</button></div>}
-        </div>
+      <section className="quiz-section" id="game">
+        <div className="quiz-intro"><p className="section-kicker">03 · ONLY YOU KNOW</p><h2>关于我们，<br />你还记得吗？</h2><p>一起接住爱心、花花、寿司，还有那些只有我们懂的小快乐。</p></div>
+        <CatchGame basePath={basePath} />
       </section>
 
       <section id="finale" className="finale">
@@ -127,7 +211,7 @@ export default function Home() {
         <article><span>写在最后</span><h2>{loveStory.closing}</h2><button type="button" className="final-seal" onClick={() => setSecretTaps((count) => count + 1)} aria-label="隐藏彩蛋">♥</button>{secretTaps >= 5 && <p className="secret">彩蛋被你发现了：再点五下，也还是最喜欢你。</p>}</article>
         <footer><p>七夕 · 2026</p><a href="#top">再读一遍 ↑</a></footer>
       </section>
-      {musicError && <div className="toast" role="status">还没有放入专属歌曲，请添加 public/our-song.mp3</div>}
+      {musicError && <div className="toast" role="status">音乐暂时没有加载成功，稍后再点一次试试吧。</div>}
     </main>
   );
 }
